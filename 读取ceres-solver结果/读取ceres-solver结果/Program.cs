@@ -12,14 +12,27 @@ namespace 读取ceres_solver结果
         public static double initial = 0;  //初始误差
         static void Main(string[] args)
         {
-            string[] dense = File.ReadAllLines("dense");
-            string[] sparse = File.ReadAllLines("sparse");
+            //string[] dense = File.ReadAllLines("dense");
+            //string[] sparse = File.ReadAllLines("sparse");
             string[] pcg_b = File.ReadAllLines("pcg-b");
             string[] pcg_s = File.ReadAllLines("pcg-s");
-            Solver(dense, "dense");
-            Solver(sparse, "sparse");
+            //Solver(dense, "dense");
+            //Solver(sparse, "sparse");
             Solver(pcg_b, "pcg-b");
             Solver(pcg_s, "pcg-s");
+        }
+
+        static void Prepare(List<Figure> list)
+        {
+            if (list.Count > 1)
+            {
+                double initvalue = list[0].value;
+                double finalvalue=list[list.Count-1].value;
+                for (int i = 0; i < list.Count; i++)
+                {
+                    list[i].value=1-(initvalue - list[i].value)/(initvalue - finalvalue);
+                }
+            }
         }
 
         static void Solver(string[] input, string name)
@@ -28,13 +41,14 @@ namespace 读取ceres_solver结果
             StringBuilder value = new StringBuilder();
             List<Figure> list = new List<Figure>();
             list = GetResult(input);
-            double ratio = initial;
-            list[0].time = 0.1;  //重设初值
-            list[0].value = 1;   //重设初值
-            for (int i = 1; i < list.Count; i++)
-            {
-                list[i].value /= ratio;  //获取y轴数据
-            }
+            Prepare(list);
+            //double ratio = initial;
+            //list[0].time = 0;  //重设初值
+            //list[0].value = 1;   //重设初值
+            //for (int i = 1; i < list.Count; i++)
+            //{
+            //    list[i].value /= ratio;  //获取y轴数据
+            //}
             //Figure f = new Figure();
             //f.time = 0;
             //f.value = 0;
@@ -67,7 +81,7 @@ namespace 读取ceres_solver结果
                             //break;   跳出该层循环，可以求平均值 
                             //注意这个正则表达式！！！
                             //预处理的值（带指数）
-                            string[] prevalue = t2[2].Split(new string[] { "e+", "e-" }, StringSplitOptions.RemoveEmptyEntries);
+                            string[] prevalue = t2[1].Split(new string[] { "e+", "e-" }, StringSplitOptions.RemoveEmptyEntries);
                             double value = double.Parse(prevalue[0]) * Math.Pow(10, double.Parse(prevalue[1]));
                             //预处理时间
                             string[] pretime = t2[9].Split(new string[] { "e+", "e-" }, StringSplitOptions.RemoveEmptyEntries);
